@@ -1,6 +1,9 @@
 # Ignora arquivos compilados e o executável
 *.class
 *.jar
+.classpath
+.project
+.settings/
 
 # Protege a senha do banco
 src/dao/ConexaoBD.java
