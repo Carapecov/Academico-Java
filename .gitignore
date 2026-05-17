@@ -6,4 +6,4 @@
 .settings/
 
 # Protege a senha do banco
-src/dao/ConexaoBD.java
+src/dao/ConexaoDB.java
