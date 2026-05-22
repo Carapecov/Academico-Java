@@ -1,52 +1,87 @@
 package dao;
 
-import model.Aluno;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class AlunoDAO {
+import model.Aluno;
 
-    public boolean salvar(Aluno aluno) {
-        String sql = "INSERT INTO aluno (rgm, nome, data_nascimento, cpf, email, curso) VALUES (?, ?, ?, ?, ?, ?)";
-        
-        try (Connection conn = ConexaoDB.conectar();
+public class AlunoDAO {
+    
+    public void salvar(Aluno aluno) throws SQLException {
+        String sql = "INSERT INTO aluno (rgm, nome, data_nascimento, cpf, email, endereco, municipio, uf, celular, curso, campus, periodo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = ConexaoDB.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
             stmt.setString(1, aluno.getRgm());
             stmt.setString(2, aluno.getNome());
             stmt.setString(3, aluno.getDataNascimento());
             stmt.setString(4, aluno.getCpf());
             stmt.setString(5, aluno.getEmail());
-            stmt.setString(6, aluno.getCurso());
-            
+            stmt.setString(6, aluno.getEndereco());
+            stmt.setString(7, aluno.getMunicipio());
+            stmt.setString(8, aluno.getUf());
+            stmt.setString(9, aluno.getCelular());
+            stmt.setString(10, aluno.getCurso());
+            stmt.setString(11, aluno.getCampus());
+            stmt.setString(12, aluno.getPeriodo());
             stmt.executeUpdate();
-            return true;
-            
-        } catch (SQLException e) {
-            System.err.println("Erro ao salvar aluno: " + e.getMessage());
-            return false;
         }
     }
 
-    public boolean rgmExiste(String rgm) {
-        String sql = "SELECT rgm_aluno FROM aluno WHERE rgm_aluno = ?";
-        
-        // Usando try-with-resources para fechar a conexão automaticamente
-        try (Connection conn = ConexaoDB.conectar();
+    public void alterar(Aluno aluno) throws SQLException {
+        String sql = "UPDATE aluno SET nome=?, data_nascimento=?, cpf=?, email=?, endereco=?, municipio=?, uf=?, celular=?, curso=?, campus=?, periodo=? WHERE rgm=?";
+        try (Connection conn = ConexaoDB.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, rgm);
-            ResultSet rs = stmt.executeQuery();
-            
-            // O pulo do gato está aqui: rs.next() só é true se ele achou alguém
-            return rs.next(); 
-            
-        } catch (SQLException e) {
-            System.err.println("Erro ao verificar RGM: " + e.getMessage());
-            return false; // Em caso de erro de conexão, você pode decidir como tratar
+            stmt.setString(1, aluno.getNome());
+            stmt.setString(2, aluno.getDataNascimento());
+            stmt.setString(3, aluno.getCpf());
+            stmt.setString(4, aluno.getEmail());
+            stmt.setString(5, aluno.getEndereco());
+            stmt.setString(6, aluno.getMunicipio());
+            stmt.setString(7, aluno.getUf());
+            stmt.setString(8, aluno.getCelular());
+            stmt.setString(9, aluno.getCurso());
+            stmt.setString(10, aluno.getCampus());
+            stmt.setString(11, aluno.getPeriodo());
+            stmt.setString(12, aluno.getRgm());
+            stmt.executeUpdate();
         }
     }
-            
+
+    public void excluir(String rgm) throws SQLException {
+        String sql = "DELETE FROM aluno WHERE rgm = ?";
+        try (Connection conn = ConexaoDB.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, rgm);
+            stmt.executeUpdate();
+        }
+    }
+
+    public Aluno consultar(String rgm) throws SQLException {
+        String sql = "SELECT * FROM aluno WHERE rgm = ?";
+        try (Connection conn = ConexaoDB.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, rgm);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Aluno(
+                        rs.getString("rgm"),
+                        rs.getString("nome"),
+                        rs.getString("data_nascimento"),
+                        rs.getString("cpf"),
+                        rs.getString("email"),
+                        rs.getString("endereco"),
+                        rs.getString("municipio"),
+                        rs.getString("uf"),
+                        rs.getString("celular"),
+                        rs.getString("curso"),
+                        rs.getString("campus"),
+                        rs.getString("periodo")
+                    );
+                }
+            }
+        }
+        return null;
+    }
 }
